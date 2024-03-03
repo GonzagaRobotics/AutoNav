@@ -1,0 +1,2 @@
+GeoPoint location
+TargetType type
