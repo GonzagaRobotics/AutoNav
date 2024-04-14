@@ -1,0 +1,4 @@
+final_lat_north 38.42880763128888
+final_lng_east -110.76317009142954
+final_lat_south 38.38376428193558
+final_lng_west -110.82041390857046

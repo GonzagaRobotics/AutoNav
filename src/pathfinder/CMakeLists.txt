@@ -9,8 +9,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
-find_package(auto_nav_msgs REQUIRED)
-find_package(rcs_interfaces REQUIRED)
+find_package(auto_nav_interfaces REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -24,12 +23,25 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
+include_directories(
+  ${auto_nav_interfaces_INCLUDE_DIRS}
+)
+
 add_executable(pathfinder
-  src/stb_image.h
-  src/fsa.h
-  src/astar.h
+  src/deps/fsa.h
+  src/deps/astar.h
+  src/deps/stb_image.h
+  src/deps/stb_image_write.h
+  src/Site.h
+  src/Site.cpp
+  src/SiteLoader.h
+  src/SiteLoader.cpp
+  src/Search.h
+  src/Search.cpp
+  src/debug/DebugKML.h
+  src/debug/DebugKML.cpp
   src/Main.cpp)
-ament_target_dependencies(pathfinder rclcpp std_msgs auto_nav_msgs rcs_interfaces)
+ament_target_dependencies(pathfinder rclcpp std_msgs auto_nav_interfaces)
 
 install(TARGETS pathfinder DESTINATION lib/${PROJECT_NAME})
 

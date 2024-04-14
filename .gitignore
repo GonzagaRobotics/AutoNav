@@ -1,0 +1,9 @@
+# ROS Generated Files
+build/
+install/
+log/
+*.swp
+
+# For now, we are going to ignore the dependency we use for the project
+# until we have a better way to handle it
+src/rcs_interfaces

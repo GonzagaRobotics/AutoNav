@@ -1,2 +1,0 @@
-Target target
-GeoPoint[] waypoints

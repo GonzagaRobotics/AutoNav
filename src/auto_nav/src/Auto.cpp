@@ -4,71 +4,67 @@ AutoNav::AutoNav() : Node("auto_nav")
 {
     using namespace std::placeholders;
 
-    state = State::DISABLED;
+    state = State::Disabled;
     target.reset();
     plan.reset();
 
     currentLocation.latitude = 38.407241;
     currentLocation.longitude = -110.790854;
 
-    killswitchSubscriber = create_subscription<KillswitchMsg>(
+    killswitchSubscriber = create_subscription<Killswitch>(
         "/killswitch",
         10,
         std::bind(&AutoNav::onKillswitch, this, _1));
 
-    confirmStartSubscriber = create_subscription<ConfirmStartMsg>(
+    confirmStartSubscriber = create_subscription<ConfirmStart>(
         "/confirm_start",
         10,
         std::bind(&AutoNav::onConfirmStart, this, _1));
 
-    confirmStopSubscriber = create_subscription<ConfirmStopMsg>(
+    confirmStopSubscriber = create_subscription<ConfirmStop>(
         "/confirm_stop",
         10,
         std::bind(&AutoNav::onConfirmStop, this, _1));
 
-    statePublisher = create_publisher<StateMsg>("/auto_nav/state", 10);
-    planPublisher = create_publisher<PlanMsg>("/auto_nav/plan", 10);
+    statePublisher = create_publisher<State>("/auto_nav/state", 10);
+    planPublisher = create_publisher<Plan>("/auto_nav/plan", 10);
 
-    querySubscriber = create_subscription<EmptyMsg>(
-        "/auto_nav/query",
-        10,
-        std::bind(&AutoNav::onQuery, this, _1));
-
-    targetSubscriber = create_subscription<TargetMsg>(
+    targetSubscriber = create_subscription<Target>(
         "/auto_nav/target",
         10,
         std::bind(&AutoNav::onTarget, this, _1));
 
-    instructionSubscriber = create_subscription<InstructionMsg>(
+    instructionSubscriber = create_subscription<Instruction>(
         "/auto_nav/instruction",
         10,
         std::bind(&AutoNav::onInstruction, this, _1));
 
-    pathfinderTargetPublisher = create_publisher<GeoPointMsg>("/pathfinder/target", 10);
+    pathfinderTargetPublisher = create_publisher<Target>("/pathfinder/target", 10);
 
-    pathfinderPlanSubscriber = create_subscription<PlanMsg>(
+    pathfinderPlanSubscriber = create_subscription<Plan>(
         "/pathfinder/plan",
         10,
         std::bind(&AutoNav::onPathfinderPlan, this, _1));
 }
 
-void AutoNav::onKillswitch(const KillswitchMsg::SharedPtr)
+void AutoNav::onKillswitch(const Killswitch)
 {
-    state = State::DISABLED;
+    state = State::Disabled;
     target.reset();
     plan.reset();
 
     publishStatus();
 }
 
-void AutoNav::onConfirmStart(const ConfirmStartMsg::SharedPtr)
+void AutoNav::onConfirmStart(const ConfirmStart)
 {
+    state = State::Ready;
     publishStatus();
 }
 
-void AutoNav::onConfirmStop(const ConfirmStopMsg::SharedPtr)
+void AutoNav::onConfirmStop(const ConfirmStop)
 {
-    state = State::DISABLED;
+    state = State::Disabled;
     target.reset();
     plan.reset();
 
@@ -77,80 +73,32 @@ void AutoNav::onConfirmStop(const ConfirmStopMsg::SharedPtr)
 
 void AutoNav::publishStatus()
 {
-    StateMsg stateMsg;
-    stateMsg.state = static_cast<uint16_t>(state);
+    statePublisher->publish(state);
+    planPublisher->publish(plan.value_or(Plan()));
+}
 
-    PlanMsg planMsg;
-    planMsg.waypoints = std::vector<GeoPointMsg>();
-    if (plan)
+void AutoNav::onTarget(const Target msg)
+{
+    target = msg;
+    state = State::Planning;
+
+    publishStatus();
+
+    pathfinderTargetPublisher->publish(msg);
+}
+
+void AutoNav::onInstruction(const Instruction msg)
+{
+    if (state == State::Ready)
     {
-        for (const auto &waypoint : plan->waypoints)
+        if (msg == Instruction::Execute)
         {
-            GeoPointMsg geoPointMsg;
-            geoPointMsg.latitude = waypoint.latitude;
-            geoPointMsg.longitude = waypoint.longitude;
-            planMsg.waypoints.push_back(geoPointMsg);
+            state = State::Traveling;
         }
-    }
-
-    TargetMsg targetMsg;
-    if (target)
-    {
-        targetMsg.location.latitude = target->location.latitude;
-        targetMsg.location.longitude = target->location.longitude;
-        targetMsg.type.type = static_cast<uint16_t>(target->type);
-    }
-    else
-    {
-        targetMsg.type.type = static_cast<uint16_t>(TargetType::NULL_TARGET);
-    }
-
-    planMsg.target = targetMsg;
-
-    statePublisher->publish(stateMsg);
-    planPublisher->publish(planMsg);
-}
-
-void AutoNav::onQuery(const EmptyMsg::SharedPtr)
-{
-    publishStatus();
-}
-
-void AutoNav::onTarget(const TargetMsg::SharedPtr msg)
-{
-    target = Target{
-        GeoPoint{msg->location.latitude, msg->location.longitude},
-        static_cast<TargetType>(msg->type.type)};
-
-    state = State::PLANNING;
-
-    publishStatus();
-
-    pathfinderTargetPublisher->publish(msg->location);
-}
-
-void AutoNav::onInstruction(const InstructionMsg::SharedPtr msg)
-{
-    switch (static_cast<Instruction>(msg->instruction))
-    {
-    case Instruction::PAUSE:
-        // Pause the current plan
-        state = State::WAITING;
-        break;
-    case Instruction::RESUME:
-        // TODO: Resume from pause
-        state = State::MOVING;
-        break;
-    case Instruction::TERMINATE:
-        // Terminate the current plan
-        state = State::DISABLED;
-        target.reset();
-        plan.reset();
-        break;
-    case Instruction::EXECUTE:
-        // Execute the current plan
-        state = State::MOVING;
-        break;
+        else if (msg == Instruction::Terminate)
+        {
+            state = State::Ready;
+        }
     }
 
     publishStatus();
