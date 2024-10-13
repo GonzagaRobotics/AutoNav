@@ -2,14 +2,15 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>pathfinder</name>
-  <version>0.2.0</version>
-  <description>Finds paths over terrain for AutoNav.</description>
+  <version>0.4.0</version>
+  <description>Finds paths over terrain using elevation data.</description>
   <maintainer email="57426668+BruhSoundEffectNumber2@users.noreply.github.com">damon</maintainer>
   <license>MIT</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>rclcpp</depend>
+  <depend>rclcpp_action</depend>
   <depend>std_msgs</depend>
   <depend>auto_nav_interfaces</depend>
 

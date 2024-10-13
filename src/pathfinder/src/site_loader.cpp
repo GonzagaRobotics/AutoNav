@@ -1,8 +1,13 @@
-#include "SiteLoader.h"
+#include "site_loader.hpp"
 
-void SiteLoader::loadBounds(double &latNorth, double &lngEast, double &latSouth, double &lngWest)
+void SiteLoader::loadBounds(
+    const std::string &name,
+    double &latNorth,
+    double &lngEast,
+    double &latSouth,
+    double &lngWest)
 {
-    auto file = std::ifstream(name + "_bounds.txt");
+    auto file = std::ifstream(pathToDir + name + "_bounds.txt");
 
     if (!file.is_open())
     {
@@ -46,13 +51,18 @@ void SiteLoader::loadBounds(double &latNorth, double &lngEast, double &latSouth,
     file.close();
 }
 
-std::shared_ptr<Site> SiteLoader::load()
+SiteLoader::SiteLoader(const std::string &pathToDir)
+{
+    this->pathToDir = pathToDir;
+}
+
+std::shared_ptr<Site> SiteLoader::load(const std::string &name)
 {
     double latNorth, lngEast, latSouth, lngWest;
-    loadBounds(latNorth, lngEast, latSouth, lngWest);
+    loadBounds(name, latNorth, lngEast, latSouth, lngWest);
 
     int width, height, channels;
-    auto filename = name + "_slope.png";
+    auto filename = pathToDir + name + "_slope.png";
 
     unsigned char *imageData = stbi_load(filename.c_str(), &width, &height, &channels, 0);
 

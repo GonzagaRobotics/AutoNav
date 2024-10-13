@@ -1,6 +1,6 @@
 GeoLoc location
-# 0: High precision GeoLocation
-# 1: Post marked with ARUCO tag
-# 2: Rubber mallet
-# 3: Water bottle
+# 0: GEO_LOC - High precision GPS coordinates
+# 1: ARUCO - Post marked with ARUCO tags
+# 2: MALLET - Rubber mallet
+# 3: BOTTLE - Water bottle
 uint8 type

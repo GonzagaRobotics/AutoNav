@@ -8,6 +8,7 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(auto_nav_interfaces REQUIRED)
 
@@ -28,20 +29,18 @@ include_directories(
 )
 
 add_executable(pathfinder
-  src/deps/fsa.h
-  src/deps/astar.h
-  src/deps/stb_image.h
-  src/deps/stb_image_write.h
-  src/Site.h
-  src/Site.cpp
-  src/SiteLoader.h
-  src/SiteLoader.cpp
-  src/Search.h
-  src/Search.cpp
-  src/debug/DebugKML.h
-  src/debug/DebugKML.cpp
-  src/Main.cpp)
-ament_target_dependencies(pathfinder rclcpp std_msgs auto_nav_interfaces)
+  src/site.cpp
+  src/site_loader.cpp
+  src/search.cpp
+  src/debug/debug_kml.cpp
+  src/pathfinder.cpp
+  src/main.cpp)
+
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  target_compile_definitions(pathfinder PRIVATE DEBUG)
+endif()
+
+ament_target_dependencies(pathfinder rclcpp rclcpp_action std_msgs auto_nav_interfaces)
 
 install(TARGETS pathfinder DESTINATION lib/${PROJECT_NAME})
 

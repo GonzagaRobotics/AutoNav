@@ -10,6 +10,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/State.msg"
   "msg/Target.msg"
   "msg/Instruction.msg"
+  "action/MakePlan.action"
 )
 
 install(

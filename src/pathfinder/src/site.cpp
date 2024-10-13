@@ -1,4 +1,4 @@
-#include "Site.h"
+#include "site.hpp"
 
 Site::Site(int width, int height, double latNorth, double lngEast, double latSouth, double lngWest, unsigned char *data)
 {
@@ -13,7 +13,9 @@ Site::Site(int width, int height, double latNorth, double lngEast, double latSou
 
 Site::~Site()
 {
-    delete[] data;
+    // Since the data is collected from stbi_load, it was allocated with malloc.
+    // It's a good idea to use free() to deallocate it instead of delete[].
+    free(data);
 }
 
 int Site::getWidth() const
@@ -90,7 +92,10 @@ bool Site::rayCast(std::pair<int, int> start, std::pair<int, int> end) const
 
     for (; n > 0; --n)
     {
-        if (isObstacle(lx, ly, dx >= dy, dy >= dx))
+        // Since we can move through obstacles in certain conditions, we use
+        // our knowledge of the direction of the ray to determine whether
+        // we should check for obstacles in the north/south and/or east/west direction.
+        if (isObstacle(lx, ly, dy >= dx, dx >= dy))
         {
             return true;
         }

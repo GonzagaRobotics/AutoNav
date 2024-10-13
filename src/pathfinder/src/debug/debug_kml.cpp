@@ -1,20 +1,23 @@
-#include "DebugKML.h"
+#include "debug_kml.hpp"
 
-void debugKML(const std::string &name, const GeoLoc &start, const Plan &plan)
+void debugKML(const std::string &static_dir, const GeoLoc &start, const Plan &plan)
 {
-    auto infile = std::ifstream("/home/damon/robotics/AutoNav/static/kml_debug_template.txt");
+    auto infile = std::ifstream(static_dir + "kml_debug_template.txt");
 
     if (!infile.is_open())
     {
         throw std::runtime_error("Could not open kml_debug_template.txt");
     }
 
-    auto outfile = std::ofstream(name);
+    std::string outName =
+        "path_" + std::to_string(std::chrono::system_clock::now().time_since_epoch().count());
+
+    auto outfile = std::ofstream(static_dir + outName + ".kml");
 
     if (!outfile.is_open())
     {
         infile.close();
-        throw std::runtime_error("Could not open " + name);
+        throw std::runtime_error("Could not open output file");
     }
 
     std::string line;
@@ -35,13 +38,14 @@ void debugKML(const std::string &name, const GeoLoc &start, const Plan &plan)
                 outfile << waypoint.longitude << "," << waypoint.latitude << ",0\n";
             }
 
+            // Reset the precision so we don't mess up other output
             outfile.precision(prevPrecision);
         }
         else
         {
             if (line.find("%NAME%") != std::string::npos)
             {
-                line.replace(line.find("%NAME%"), 6, name);
+                line.replace(line.find("%NAME%"), 6, outName);
             }
 
             outfile << line << "\n";

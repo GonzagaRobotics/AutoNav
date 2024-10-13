@@ -4,6 +4,7 @@ install/
 log/
 *.swp
 
-# For now, we are going to ignore the dependency we use for the project
-# until we have a better way to handle it
-src/rcs_interfaces
+__pycache__/
+
+# Dependencies
+src/core_interfaces/

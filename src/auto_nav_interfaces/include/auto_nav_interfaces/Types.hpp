@@ -1,57 +1,136 @@
 #pragma once
 
 #include <vector>
+#include <string>
 #include "rclcpp/rclcpp.hpp"
+#include "rclcpp_action/rclcpp_action.hpp"
 #include "auto_nav_interfaces/msg/instruction.hpp"
 #include "auto_nav_interfaces/msg/state.hpp"
 #include "auto_nav_interfaces/msg/geo_loc.hpp"
 #include "auto_nav_interfaces/msg/target.hpp"
 #include "auto_nav_interfaces/msg/plan.hpp"
+#include "auto_nav_interfaces/action/make_plan.hpp"
 
-enum class TargetType : unsigned char
+/**
+ * The types of targets that AutoNav can navigate to.
+ */
+enum class TargetType : uint8_t
 {
-    GeoLoc,
-    Post,
-    Mallet,
-    Bottle
+    /** High precision GPS coordinates. */
+    GEO_LOC,
+    /** Post marked with ARUCO tags. */
+    ARUCO,
+    /** Rubber mallet. */
+    MALLET,
+    /** Water bottle. */
+    BOTTLE
 };
 
-enum class Instruction : unsigned char
+/**
+ * The instructions that can be sent to AutoNav.
+ */
+enum class Instruction : uint8_t
 {
-    Pause,
-    Resume,
-    Terminate,
-    Execute
+    /** Temporarily stop the current plan. */
+    PAUSE,
+    /** Continue following the current plan. */
+    RESUME,
+    /** Begin executing the current plan. */
+    EXECUTE,
+    /** Stop the current plan and return to the READY state. */
+    TERMINATE
 };
 
-enum class State : unsigned char
+/**
+ * The possible states of AutoNav.
+ */
+enum class State : uint8_t
 {
-    Disabled,
-    Ready,
-    Planning,
-    Traveling,
-    TerminalSearching,
-    TerminalMoving,
-    Success,
-    Failure
+    /** AutoNav is disabled and won't do anything. */
+    DISABLED,
+    /** AutoNav is ready to receive a target. */
+    READY,
+    /** AutoNav is making a plan to reach the target. */
+    PLANNING,
+    /** AutoNav is traveling towards the target. */
+    TRAVELING,
+    /** AutoNav is searching for the target. */
+    TERMINAL_SEARCHING,
+    /** AutoNav found the target and is moving towards it. */
+    TERMINAL_MOVING,
+    /** AutoNav reached the target. */
+    SUCCESS,
+    /** AutoNav is unable to reach the target. */
+    FAILURE
 };
 
+/**
+ * A high precision GPS location.
+ */
 struct GeoLoc
 {
+    using SharedPtr = std::shared_ptr<GeoLoc>;
+
+    /** -90 to 90 degrees. */
     double latitude;
+    /** -180 to 180 degrees. */
     double longitude;
+
+    std::string to_string() const
+    {
+        return "(" + std::to_string(latitude) + ", " + std::to_string(longitude) + ")";
+    }
 };
 
+/**
+ * A target that AutoNav can navigate to.
+ */
 struct Target
 {
+    using SharedPtr = std::shared_ptr<Target>;
+
+    /** Where the target is located. */
     GeoLoc location;
+    /** The type of target. */
     TargetType type;
+
+    std::string to_string() const
+    {
+        std::string typeString;
+
+        switch (type)
+        {
+        case TargetType::GEO_LOC:
+            typeString = "Geo Location";
+            break;
+        case TargetType::ARUCO:
+            typeString = "ARUCO Post";
+            break;
+        case TargetType::MALLET:
+            typeString = "Rubber Mallet";
+            break;
+        case TargetType::BOTTLE:
+            typeString = "Water Bottle";
+            break;
+        }
+
+        return typeString + " at " + location.to_string();
+    }
 };
 
+/**
+ * A plan to navigate to a target.
+ */
 struct Plan
 {
+    using SharedPtr = std::shared_ptr<Plan>;
+
+    /** The waypoints to reach the target. The final element is the target. */
     std::vector<GeoLoc> waypoints;
 };
+
+using MakePlan = auto_nav_interfaces::action::MakePlan;
+using MakePlanGoalHandle = rclcpp_action::ServerGoalHandle<MakePlan>;
 
 template <>
 struct rclcpp::TypeAdapter<Instruction, auto_nav_interfaces::msg::Instruction>
