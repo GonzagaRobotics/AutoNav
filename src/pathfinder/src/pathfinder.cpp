@@ -25,7 +25,7 @@ void Pathfinder::onPathfinderCheck()
         {
             RCLCPP_INFO(this->get_logger(), "Pathfinding complete");
 
-#ifdef DEBUG
+            // #ifdef DEBUG
             auto static_dir = this->get_parameter("static_dir").as_string();
 
             GeoLoc currentLocation;
@@ -33,7 +33,7 @@ void Pathfinder::onPathfinderCheck()
             currentLocation.longitude = currentGoalHandle->get_goal()->current_location.longitude;
 
             debugKML(static_dir, currentLocation, Plan{result.first});
-#endif
+            // #endif
 
             currentGoalHandle->succeed(resultMsg);
         }

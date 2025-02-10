@@ -14,9 +14,9 @@
 #include "site_loader.hpp"
 #include "search.hpp"
 
-#ifdef DEBUG
+// #ifdef DEBUG
 #include "debug/debug_kml.hpp"
-#endif
+// #endif
 
 /**
  * Finds paths through a site.
