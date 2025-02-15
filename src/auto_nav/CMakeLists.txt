@@ -8,10 +8,9 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(auto_nav_interfaces REQUIRED)
-find_package(rcs_interfaces REQUIRED)
-
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -27,16 +26,15 @@ endif()
 
 include_directories(
   ${auto_nav_interfaces_INCLUDE_DIRS}
-  ${rcs_interfaces_INCLUDE_DIRS}
 )
 
 add_executable(auto_nav 
-  src/Auto.h
-  src/Auto.cpp 
-  src/Main.cpp)
-ament_target_dependencies(auto_nav rclcpp std_msgs auto_nav_interfaces rcs_interfaces)
+  src/auto_nav.hpp
+  src/auto_nav.cpp 
+  src/main.cpp)
+
+ament_target_dependencies(auto_nav rclcpp rclcpp_action std_msgs auto_nav_interfaces)
 
 install(TARGETS auto_nav DESTINATION lib/${PROJECT_NAME})
-
 
 ament_package()

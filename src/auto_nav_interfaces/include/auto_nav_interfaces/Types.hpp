@@ -52,12 +52,16 @@ enum class State : uint8_t
     READY,
     /** AutoNav is making a plan to reach the target. */
     PLANNING,
+    /** AutoNav has a plan and is waiting for an instruction. */
+    WAITING,
     /** AutoNav is traveling towards the target. */
     TRAVELING,
     /** AutoNav is searching for the target. */
     TERMINAL_SEARCHING,
     /** AutoNav found the target and is moving towards it. */
     TERMINAL_MOVING,
+    /** AutoNav is paused. */
+    PAUSED,
     /** AutoNav reached the target. */
     SUCCESS,
     /** AutoNav is unable to reach the target. */

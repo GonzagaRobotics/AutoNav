@@ -17,10 +17,10 @@ def generate_launch_description():
             'site_name',
             description='Name of the site the rover is in'
         ),
-        # Node(
-        #     package='auto_nav',
-        #     executable='auto_nav',
-        # ),
+        Node(
+            package='auto_nav',
+            executable='auto_nav',
+        ),
         Node(
             package='pathfinder',
             executable='pathfinder',

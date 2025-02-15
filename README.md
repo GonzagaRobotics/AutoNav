@@ -1,6 +1,6 @@
 # Auto Nav
 
-Version: 0.2.0
+Version: 0.4.0
 
 Code name: N/A
 
@@ -9,8 +9,6 @@ Code name: N/A
 Controls autonomous navigation and manages the various sub-systems that are required for autonomous navigation. Auto Nav is responsible for communicating with the Control System and sending that information where needed.
 
 ## Dependencies
-
-<!-- -   core_interfaces v0.3.0 -->
 
 ## Build and Run
 
