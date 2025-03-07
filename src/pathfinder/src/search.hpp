@@ -32,7 +32,15 @@ private:
     /**
      * Gets a pointer to the node at the given coordinates. Will return nullptr if the coordinates are out of bounds.
      */
-    SearchNode *getNode(int x, int y);
+    SearchNode *getNode(int x, int y)
+    {
+        if (x < 0 || x >= this->site->getWidth() || y < 0 || y >= this->site->getHeight())
+        {
+            return nullptr;
+        }
+
+        return &(this->allNodes[y * this->site->getWidth() + x]);
+    }
 
     /**
      * Gets the neighbors of the given node and stores them in the neighbors vector.
@@ -47,7 +55,16 @@ private:
     /**
      * Calculates and returns the distance between two nodes.
      */
-    int getDistance(const SearchNode *nodeA, const SearchNode *nodeB) const;
+    int getDistance(const SearchNode *nodeA, const SearchNode *nodeB) const
+    {
+        // We are using a variation of the Octile distance heuristic,
+        // where we use 10 and 14 instead of 1 and sqrt(2) respectively.
+
+        int xDist = std::abs(nodeA->x - nodeB->x);
+        int yDist = std::abs(nodeA->y - nodeB->y);
+
+        return 10 * (xDist + yDist) + (14 - 2 * 10) * std::min(xDist, yDist);
+    }
 
     /**
      * Retraces the path from the end node to the start node.

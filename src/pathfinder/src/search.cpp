@@ -1,15 +1,5 @@
 #include "search.hpp"
 
-SearchNode *Search::getNode(int x, int y)
-{
-    if (x < 0 || x >= this->site->getWidth() || y < 0 || y >= this->site->getHeight())
-    {
-        return nullptr;
-    }
-
-    return &(this->allNodes[y * this->site->getWidth() + x]);
-}
-
 void Search::getNeighbors(std::vector<SearchNode *> &neighbors, const SearchNode *node)
 {
     // Since we are reusing the neighbors vector, we need to clear it first.
@@ -79,17 +69,6 @@ void Search::getNeighbors(std::vector<SearchNode *> &neighbors, const SearchNode
     {
         neighbors.push_back(getNode(node->x - 1, node->y - 1));
     }
-}
-
-int Search::getDistance(const SearchNode *nodeA, const SearchNode *nodeB) const
-{
-    // We are using a variation of the Octile distance heuristic,
-    // where we use 10 and 14 instead of 1 and sqrt(2) respectively.
-
-    int xDist = std::abs(nodeA->x - nodeB->x);
-    int yDist = std::abs(nodeA->y - nodeB->y);
-
-    return 10 * (xDist + yDist) + (14 - 2 * 10) * std::min(xDist, yDist);
 }
 
 std::vector<SearchNode> Search::retracePath(const SearchNode *start, const SearchNode *end) const
