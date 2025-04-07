@@ -9,6 +9,7 @@
 #include "auto_nav_interfaces/msg/geo_loc.hpp"
 #include "auto_nav_interfaces/msg/target.hpp"
 #include "auto_nav_interfaces/msg/plan.hpp"
+#include "auto_nav_interfaces/srv/query_state.hpp"
 #include "auto_nav_interfaces/action/make_plan.hpp"
 
 /**
@@ -135,6 +136,10 @@ struct Plan
 
 using MakePlan = auto_nav_interfaces::action::MakePlan;
 using MakePlanGoalHandle = rclcpp_action::ServerGoalHandle<MakePlan>;
+
+using QueryStateService = auto_nav_interfaces::srv::QueryState;
+using QueryStateRequest = auto_nav_interfaces::srv::QueryState::Request;
+using QueryStateResponse = auto_nav_interfaces::srv::QueryState::Response;
 
 template <>
 struct rclcpp::TypeAdapter<Instruction, auto_nav_interfaces::msg::Instruction>

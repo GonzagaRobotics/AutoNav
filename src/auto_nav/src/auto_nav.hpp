@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "rclcpp/rclcpp.hpp"
-#include "rclcpp_action/rclcpp_action.hpp"
 #include "std_msgs/msg/bool.hpp"
 #include "auto_nav_interfaces/Types.hpp"
 
@@ -15,39 +14,21 @@ class AutoNav : public rclcpp::Node
 {
 private:
     State state;
-    GeoLoc currentLocation;
 
-    std::optional<Target> target;
-    std::optional<Plan> plan;
+    rclcpp::Publisher<State>::SharedPtr statePub;
 
-    rclcpp::Publisher<State>::SharedPtr statePublisher;
+    rclcpp::Service<QueryStateService>::SharedPtr queryStateService;
 
-    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr enableSubscription;
-    rclcpp::Subscription<Instruction>::SharedPtr instructionSubscription;
+    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr enableSub;
+    rclcpp::Subscription<Instruction>::SharedPtr instructionSub;
 
-    rclcpp::Subscription<Target>::SharedPtr targetSubscription;
-    rclcpp::Publisher<Plan>::SharedPtr planPublisher;
+    void queryState(const std::shared_ptr<QueryStateService::Request> request,
+                    std::shared_ptr<QueryStateService::Response> response);
 
-    rclcpp_action::Client<MakePlan>::SharedPtr makePlanClient;
+    void onEnable(const std_msgs::msg::Bool::SharedPtr msg);
+    void onInstruction(const Instruction msg);
 
-    void enableCallback(const std_msgs::msg::Bool::SharedPtr msg);
-    void instructionCallback(const Instruction msg);
-
-    void targetCallback(const Target::SharedPtr msg);
-
-    void onMakePlanGoalResponse(const rclcpp_action::ClientGoalHandle<MakePlan>::SharedPtr &goalHandle);
-
-    void onMakePlanFeedback(rclcpp_action::ClientGoalHandle<MakePlan>::SharedPtr,
-                            const auto_nav_interfaces::action::MakePlan::Feedback::ConstSharedPtr) {}
-
-    void onMakePlanResult(const rclcpp_action::ClientGoalHandle<MakePlan>::WrappedResult &result);
-
-    bool isStateMoving()
-    {
-        return state == State::TRAVELING ||
-               state == State::TERMINAL_SEARCHING ||
-               state == State::TERMINAL_MOVING;
-    }
+    void setState(State newState);
 
 public:
     AutoNav();
