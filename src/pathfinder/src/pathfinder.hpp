@@ -34,7 +34,7 @@ private:
     std::future<std::pair<std::vector<GeoLoc>, std::string>> pathfinderFuture;
 
     /** The current goal handle for making a plan. */
-    std::shared_ptr<MakePlanGoalHandle> currentGoalHandle;
+    std::shared_ptr<MakePlanSGH> currentGoalHandle;
 
     /** The action server for making plans. */
     rclcpp_action::Server<MakePlan>::SharedPtr makePlanServer;
@@ -49,10 +49,10 @@ private:
         std::shared_ptr<const MakePlan::Goal> goal);
 
     rclcpp_action::CancelResponse onMakePlanCancel(
-        const std::shared_ptr<MakePlanGoalHandle> goalHandle);
+        const std::shared_ptr<MakePlanSGH> goalHandle);
 
     void onMakePlanExecute(
-        const std::shared_ptr<MakePlanGoalHandle> goalHandle);
+        const std::shared_ptr<MakePlanSGH> goalHandle);
 
 public:
     Pathfinder();

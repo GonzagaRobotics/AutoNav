@@ -65,7 +65,7 @@ rclcpp_action::GoalResponse Pathfinder::onMakePlanGoal(
     return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
 }
 
-rclcpp_action::CancelResponse Pathfinder::onMakePlanCancel(const std::shared_ptr<MakePlanGoalHandle>)
+rclcpp_action::CancelResponse Pathfinder::onMakePlanCancel(const std::shared_ptr<MakePlanSGH>)
 {
     RCLCPP_INFO(this->get_logger(), "Goal canceled");
 
@@ -75,7 +75,7 @@ rclcpp_action::CancelResponse Pathfinder::onMakePlanCancel(const std::shared_ptr
     return rclcpp_action::CancelResponse::ACCEPT;
 }
 
-void Pathfinder::onMakePlanExecute(const std::shared_ptr<MakePlanGoalHandle> goalHandle)
+void Pathfinder::onMakePlanExecute(const std::shared_ptr<MakePlanSGH> goalHandle)
 {
     auto goalMsg = goalHandle->get_goal();
 

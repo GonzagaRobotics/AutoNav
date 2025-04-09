@@ -160,7 +160,9 @@ struct Plan
 };
 
 using MakePlan = auto_nav_interfaces::action::MakePlan;
-using MakePlanGoalHandle = rclcpp_action::ServerGoalHandle<MakePlan>;
+using MakePlanSGH = rclcpp_action::ServerGoalHandle<MakePlan>;
+using MakePlanCGH = rclcpp_action::ClientGoalHandle<MakePlan>;
+using MakePlanFeedback = auto_nav_interfaces::action::MakePlan::Feedback;
 
 using QueryStateService = auto_nav_interfaces::srv::QueryState;
 using QueryStateRequest = auto_nav_interfaces::srv::QueryState::Request;
