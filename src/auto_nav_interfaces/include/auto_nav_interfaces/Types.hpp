@@ -12,6 +12,31 @@
 #include "auto_nav_interfaces/srv/query_state.hpp"
 #include "auto_nav_interfaces/action/make_plan.hpp"
 
+#define TYPE_ADAPTER_OPEN(custom, ros)         \
+    template <>                                \
+    struct rclcpp::TypeAdapter<custom, ros>    \
+    {                                          \
+        using is_specialized = std::true_type; \
+        using custom_type = custom;            \
+        using ros_message_type = ros;
+
+#define TYPE_ADAPTER_CLOSE() \
+    }                        \
+    ;
+
+#define TO_ROS_OPEN()                                                                            \
+    static void convert_to_ros_message(const custom_type &source, ros_message_type &destination) \
+    {
+
+#define TO_ROS_CLOSE() \
+    }
+
+#define TO_CUSTOM_OPEN()                                                                    \
+    static void convert_to_custom(const ros_message_type &source, custom_type &destination) \
+    {
+#define TO_CUSTOM_CLOSE() \
+    }
+
 /**
  * The types of targets that AutoNav can navigate to.
  */
@@ -141,124 +166,84 @@ using QueryStateService = auto_nav_interfaces::srv::QueryState;
 using QueryStateRequest = auto_nav_interfaces::srv::QueryState::Request;
 using QueryStateResponse = auto_nav_interfaces::srv::QueryState::Response;
 
-template <>
-struct rclcpp::TypeAdapter<Instruction, auto_nav_interfaces::msg::Instruction>
-{
-    using is_specialized = std::true_type;
-    using custom_type = Instruction;
-    using ros_message_type = auto_nav_interfaces::msg::Instruction;
+TYPE_ADAPTER_OPEN(Instruction, auto_nav_interfaces::msg::Instruction)
+TO_ROS_OPEN()
+destination.instruction = static_cast<uint8_t>(source);
+TO_ROS_CLOSE()
 
-    static void convert_to_ros_message(const custom_type &source, ros_message_type &destination)
-    {
-        destination.instruction = static_cast<uint8_t>(source);
-    }
-
-    static void convert_to_custom(const ros_message_type &source, custom_type &destination)
-    {
-        destination = static_cast<Instruction>(source.instruction);
-    }
-};
+TO_CUSTOM_OPEN()
+destination = static_cast<Instruction>(source.instruction);
+TO_CUSTOM_CLOSE()
+TYPE_ADAPTER_CLOSE()
 
 RCLCPP_USING_CUSTOM_TYPE_AS_ROS_MESSAGE_TYPE(Instruction, auto_nav_interfaces::msg::Instruction);
 
-template <>
-struct rclcpp::TypeAdapter<State, auto_nav_interfaces::msg::State>
-{
-    using is_specialized = std::true_type;
-    using custom_type = State;
-    using ros_message_type = auto_nav_interfaces::msg::State;
+TYPE_ADAPTER_OPEN(State, auto_nav_interfaces::msg::State)
+TO_ROS_OPEN()
+destination.state = static_cast<uint8_t>(source);
+TO_ROS_CLOSE()
 
-    static void convert_to_ros_message(const custom_type &source, ros_message_type &destination)
-    {
-        destination.state = static_cast<uint8_t>(source);
-    }
-
-    static void convert_to_custom(const ros_message_type &source, custom_type &destination)
-    {
-        destination = static_cast<State>(source.state);
-    }
-};
+TO_CUSTOM_OPEN()
+destination = static_cast<State>(source.state);
+TO_CUSTOM_CLOSE()
+TYPE_ADAPTER_CLOSE()
 
 RCLCPP_USING_CUSTOM_TYPE_AS_ROS_MESSAGE_TYPE(State, auto_nav_interfaces::msg::State);
 
-template <>
-struct rclcpp::TypeAdapter<GeoLoc, auto_nav_interfaces::msg::GeoLoc>
-{
-    using is_specialized = std::true_type;
-    using custom_type = GeoLoc;
-    using ros_message_type = auto_nav_interfaces::msg::GeoLoc;
+TYPE_ADAPTER_OPEN(GeoLoc, auto_nav_interfaces::msg::GeoLoc)
+TO_ROS_OPEN()
+destination.latitude = source.latitude;
+destination.longitude = source.longitude;
+TO_ROS_CLOSE()
 
-    static void convert_to_ros_message(const custom_type &source, ros_message_type &destination)
-    {
-        destination.latitude = source.latitude;
-        destination.longitude = source.longitude;
-    }
-
-    static void convert_to_custom(const ros_message_type &source, custom_type &destination)
-    {
-        destination.latitude = source.latitude;
-        destination.longitude = source.longitude;
-    }
-};
+TO_CUSTOM_OPEN()
+destination.latitude = source.latitude;
+destination.longitude = source.longitude;
+TO_CUSTOM_CLOSE()
+TYPE_ADAPTER_CLOSE()
 
 RCLCPP_USING_CUSTOM_TYPE_AS_ROS_MESSAGE_TYPE(GeoLoc, auto_nav_interfaces::msg::GeoLoc);
 
-template <>
-struct rclcpp::TypeAdapter<Target, auto_nav_interfaces::msg::Target>
-{
-    using is_specialized = std::true_type;
-    using custom_type = Target;
-    using ros_message_type = auto_nav_interfaces::msg::Target;
+TYPE_ADAPTER_OPEN(Target, auto_nav_interfaces::msg::Target)
+TO_ROS_OPEN()
+rclcpp::TypeAdapter<GeoLoc, auto_nav_interfaces::msg::GeoLoc>::
+    convert_to_ros_message(source.location, destination.location);
 
-    static void convert_to_ros_message(const custom_type &source, ros_message_type &destination)
-    {
-        rclcpp::TypeAdapter<GeoLoc, auto_nav_interfaces::msg::GeoLoc>::
-            convert_to_ros_message(source.location, destination.location);
+destination.type = static_cast<uint8_t>(source.type);
+TO_ROS_CLOSE()
 
-        destination.type = static_cast<uint8_t>(source.type);
-    }
+TO_CUSTOM_OPEN()
+rclcpp::TypeAdapter<GeoLoc, auto_nav_interfaces::msg::GeoLoc>::
+    convert_to_custom(source.location, destination.location);
 
-    static void convert_to_custom(const ros_message_type &source, custom_type &destination)
-    {
-        rclcpp::TypeAdapter<GeoLoc, auto_nav_interfaces::msg::GeoLoc>::
-            convert_to_custom(source.location, destination.location);
-
-        destination.type = static_cast<TargetType>(source.type);
-    }
-};
+destination.type = static_cast<TargetType>(source.type);
+TO_CUSTOM_CLOSE()
+TYPE_ADAPTER_CLOSE()
 
 RCLCPP_USING_CUSTOM_TYPE_AS_ROS_MESSAGE_TYPE(Target, auto_nav_interfaces::msg::Target);
 
-template <>
-struct rclcpp::TypeAdapter<Plan, auto_nav_interfaces::msg::Plan>
+TYPE_ADAPTER_OPEN(Plan, auto_nav_interfaces::msg::Plan)
+TO_ROS_OPEN()
+for (const auto &waypoint : source.waypoints)
 {
-    using is_specialized = std::true_type;
-    using custom_type = Plan;
-    using ros_message_type = auto_nav_interfaces::msg::Plan;
+    auto_nav_interfaces::msg::GeoLoc geo_loc;
+    rclcpp::TypeAdapter<GeoLoc, auto_nav_interfaces::msg::GeoLoc>::
+        convert_to_ros_message(waypoint, geo_loc);
 
-    static void convert_to_ros_message(const custom_type &source, ros_message_type &destination)
-    {
-        for (const auto &waypoint : source.waypoints)
-        {
-            auto_nav_interfaces::msg::GeoLoc geo_loc;
-            rclcpp::TypeAdapter<GeoLoc, auto_nav_interfaces::msg::GeoLoc>::
-                convert_to_ros_message(waypoint, geo_loc);
+    destination.waypoints.push_back(geo_loc);
+}
+TO_ROS_CLOSE()
 
-            destination.waypoints.push_back(geo_loc);
-        }
-    }
+TO_CUSTOM_OPEN()
+for (const auto &geo_loc : source.waypoints)
+{
+    GeoLoc waypoint;
+    rclcpp::TypeAdapter<GeoLoc, auto_nav_interfaces::msg::GeoLoc>::
+        convert_to_custom(geo_loc, waypoint);
 
-    static void convert_to_custom(const ros_message_type &source, custom_type &destination)
-    {
-        for (const auto &geo_loc : source.waypoints)
-        {
-            GeoLoc waypoint;
-            rclcpp::TypeAdapter<GeoLoc, auto_nav_interfaces::msg::GeoLoc>::
-                convert_to_custom(geo_loc, waypoint);
-
-            destination.waypoints.push_back(waypoint);
-        }
-    }
-};
+    destination.waypoints.push_back(waypoint);
+}
+TO_CUSTOM_CLOSE()
+TYPE_ADAPTER_CLOSE()
 
 RCLCPP_USING_CUSTOM_TYPE_AS_ROS_MESSAGE_TYPE(Plan, auto_nav_interfaces::msg::Plan);
