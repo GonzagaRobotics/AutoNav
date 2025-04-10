@@ -384,7 +384,7 @@ std::pair<std::vector<GeoLoc>, std::string> Search::findPath(
     int gridMinSteps = 1;
     bool lastWasEnd = false;
 
-    while (canReachResult.first == false)
+    while (canReachResult.first == false && pathfinding)
     {
         // We need to determine whether the start or end node is more problematic.
         // We know the closest distance from the end node to the fill, so we will
