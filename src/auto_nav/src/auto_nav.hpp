@@ -18,6 +18,8 @@ private:
     GeoLoc currentLocation;
     std::optional<Target> target;
     std::optional<Plan> plan;
+    /** The state to return to once resumed. */
+    std::optional<State> pausedState;
 
     rclcpp::Publisher<State>::SharedPtr statePub;
     rclcpp::Publisher<Plan>::SharedPtr planPub;
@@ -44,6 +46,7 @@ private:
     void onInstruction(const Instruction msg);
 
     void setState(State newState);
+    void resetPlans();
 
 public:
     AutoNav();

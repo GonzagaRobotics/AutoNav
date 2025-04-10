@@ -3,6 +3,22 @@
 void AutoNav::queryState(const std::shared_ptr<QueryStateService::Request>, std::shared_ptr<QueryStateService::Response> response)
 {
     response->state = (int)state;
+
+    auto_nav_interfaces::msg::Plan planMsg;
+
+    if (plan)
+    {
+        for (const auto &waypoint : plan->waypoints)
+        {
+            auto geoLoc = auto_nav_interfaces::msg::GeoLoc();
+            geoLoc.latitude = waypoint.latitude;
+            geoLoc.longitude = waypoint.longitude;
+
+            planMsg.waypoints.push_back(geoLoc);
+        }
+    }
+
+    response->plan = planMsg;
 }
 
 void AutoNav::onMakePlanGoalResponse(const MakePlanCGH::SharedPtr &goalHandle)
@@ -91,15 +107,38 @@ void AutoNav::onEnable(const std_msgs::msg::Bool::SharedPtr msg)
     }
     else if (state != State::DISABLED && msg->data == false)
     {
+        resetPlans();
         setState(State::DISABLED);
-
-        // TODO: Cancel any planning
     }
 }
 
 void AutoNav::onInstruction(const Instruction msg)
 {
     RCLCPP_INFO(get_logger(), "Received instruction: %d", (int)msg);
+
+    switch (msg)
+    {
+    case Instruction::PAUSE:
+        pausedState = state;
+        setState(State::PAUSED);
+        break;
+
+    case Instruction::RESUME:
+        setState(pausedState.value());
+        pausedState.reset();
+        break;
+
+    case Instruction::EXECUTE:
+        setState(State::TRAVELING);
+        // TODO
+        break;
+
+    case Instruction::TERMINATE:
+        pausedState.reset();
+        resetPlans();
+        setState(State::READY);
+        break;
+    }
 }
 
 void AutoNav::setState(State newState)
@@ -114,6 +153,15 @@ void AutoNav::setState(State newState)
     RCLCPP_INFO(get_logger(), "State changed to: %d", (int)state);
 
     statePub->publish(state);
+}
+
+void AutoNav::resetPlans()
+{
+    plan.reset();
+    target.reset();
+    makePlanClient->async_cancel_all_goals();
+
+    planPub->publish(Plan());
 }
 
 AutoNav::AutoNav() : Node("auto_nav")

@@ -1,3 +1,4 @@
 ---
 # See State.msg for details
 uint8 state
+Plan plan
